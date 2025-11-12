@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use App\Handlers\{
     ValidadorCapacidadPago
 };
 use App\Iteradores\ColeccionPrestamos;
+
 
 class PrestamoController extends Controller
 {

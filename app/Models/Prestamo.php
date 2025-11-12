@@ -1,25 +1,21 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration {
-    public function up(): void
-    {
-        Schema::create('prestamos', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre_cliente');
-            $table->decimal('monto_solicitado', 10, 2);
-            $table->integer('historial_crediticio');
-            $table->decimal('ingresos_mensuales', 10, 2);
-            $table->string('estado')->nullable();
-            $table->timestamps();
-        });
-    }
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-    public function down(): void
-    {
-        Schema::dropIfExists('prestamos');
-    }
-};
+class Prestamo extends Model
+{
+    use HasFactory;
+
+    protected $table = 'prestamos';
+
+    protected $fillable = [
+        'nombre_cliente',
+        'monto_solicitado',
+        'historial_crediticio',
+        'ingresos_mensuales',
+        'estado'
+    ];
+}

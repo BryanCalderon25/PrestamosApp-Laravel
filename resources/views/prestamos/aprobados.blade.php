@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 @extends('layouts.app')
 
 @section('content')
@@ -17,9 +21,11 @@
 </ul>
 
 <div class="tab-content" id="prestamosTabsContent">
+    {{-- PANEL DE LISTADO DE PRÉSTAMOS --}}
     <div class="tab-pane fade show active" id="prestamos-panel" role="tabpanel" aria-labelledby="prestamos-tab">
         @if ($totalPrestamos > 0)
             <div class="row g-4 align-items-start">
+                {{-- COLUMNA IZQUIERDA --}}
                 <div class="col-lg-6">
                     <ul class="list-group shadow">
                         @foreach($coleccion as $prestamo)
@@ -39,13 +45,13 @@
                                         </div>
                                     @endif
                                 </div>
-
                                 <span class="text-secondary">{{ $prestamo->created_at->format('d/m/Y H:i') }}</span>
                             </li>
                         @endforeach
                     </ul>
                 </div>
 
+                {{-- COLUMNA DERECHA - BITÁCORA --}}
                 <div class="col-lg-6">
                     @php
                         $bitacora = $coleccion->obtenerBitacoraIteracion();
@@ -56,21 +62,23 @@
                         <div class="card-body">
                             <h5 class="card-title">Bitácora del iterador</h5>
                             <p class="card-subtitle text-muted mb-3">
-                                Observa qué métodos se ejecutan para cada préstamo mientras la vista recorre la colección personalizada.
+                                Aquí se muestran todos los métodos ejecutados durante la iteración de cada préstamo.
                             </p>
 
+                            {{-- BITÁCORA DE EVENTOS --}}
                             @if(empty($bitacora))
                                 <div class="alert alert-secondary">No se registraron eventos de iteración.</div>
                             @else
                                 <div class="accordion" id="bitacoraIterador">
                                     @foreach($bitacora as $indice => $registro)
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header" id="heading-{{ $indice }}">
-                                                <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $indice }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse-{{ $indice }}">
-                                                    Préstamo {{ $indice + 1 }}: {{ $registro['prestamo']->nombre_cliente }}
-                                                </button>
+                                        @php
+                                            $idUnico = Str::slug($registro['prestamo']->nombre_cliente . '-' . $indice);
+                                        @endphp
+                                        <div class="accordion-item border mb-3">
+                                            <h2 class="accordion-header bg-light px-3 py-2">
+                                                <strong>Préstamo {{ $indice + 1 }}:</strong> {{ $registro['prestamo']->nombre_cliente }}
                                             </h2>
-                                            <div id="collapse-{{ $indice }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" aria-labelledby="heading-{{ $indice }}" data-bs-parent="#bitacoraIterador">
+                                            <div id="collapse-{{ $idUnico }}" class="accordion-collapse collapse show">
                                                 <div class="accordion-body">
                                                     <ol class="ps-3 mb-0">
                                                         @foreach($registro['eventos'] as $evento)
@@ -87,6 +95,7 @@
                                 </div>
                             @endif
 
+                            {{-- EVENTOS DE FINALIZACIÓN --}}
                             @if (!empty($finalizacion))
                                 <div class="alert alert-light border mt-3">
                                     @foreach($finalizacion as $evento)
@@ -107,13 +116,13 @@
         </div>
     </div>
 
+    {{-- PANEL SOBRE EL ITERADOR --}}
     <div class="tab-pane fade" id="about-panel" role="tabpanel" aria-labelledby="about-tab">
         @if(isset($pasosIterador))
             <section class="mt-4">
                 <h4 class="mb-3 text-center">¿Cómo recorre la colección nuestro iterador?</h4>
                 <p class="text-muted text-center mb-4">
-                    Cada bloque representa un método de <code>IteradorPrestamos</code>. Sigue la secuencia para visualizar cómo PHP avanza sobre
-                    cada préstamo dentro del <em>foreach</em>.
+                    Cada bloque representa un método de <code>IteradorPrestamos</code> mostrando cómo PHP recorre los préstamos dentro del <em>foreach</em>.
                 </p>
                 <div class="d-flex flex-wrap justify-content-center align-items-stretch gap-3">
                     @foreach($pasosIterador as $paso)

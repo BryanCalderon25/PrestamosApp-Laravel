@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -11,7 +10,6 @@ use App\Handlers\{
     ValidadorCapacidadPago
 };
 use App\Iteradores\ColeccionPrestamos;
-
 
 class PrestamoController extends Controller
 {
@@ -38,21 +36,30 @@ class PrestamoController extends Controller
         // Procesar la solicitud
         if ($v1->manejar($prestamo)) {
             $prestamo->estado = 'Aprobado';
+            $prestamo->motivo_rechazo = null;
+            $prestamo->save();
+
+            session()->flash('mensaje', '✅ Préstamo aprobado con éxito.');
+            session()->flash('tipo', 'success');
         } else {
             $prestamo->estado = 'Rechazado';
+            $motivo = $v1->obtenerMotivoRechazo();
+            $prestamo->motivo_rechazo = $motivo; // se guarda el motivo
+            $prestamo->save();
+
+            session()->flash('mensaje', '❌ Préstamo rechazado: ' . $motivo);
+            session()->flash('tipo', 'danger');
         }
 
-        $prestamo->save();
-
-        return redirect()->route('prestamos.aprobados');
+        return redirect()->route('prestamos.crear');
     }
 
     public function aprobados()
     {
-        $prestamosAprobados = Prestamo::where('estado', 'Aprobado')->get();
-
+        $prestamos = Prestamo::latest()->get();
         $coleccion = new ColeccionPrestamos();
-        foreach ($prestamosAprobados as $prestamo) {
+
+        foreach ($prestamos as $prestamo) {
             $coleccion->agregarPrestamo($prestamo);
         }
 

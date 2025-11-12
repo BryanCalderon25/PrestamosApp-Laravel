@@ -7,6 +7,7 @@ use App\Models\Prestamo;
 abstract class ValidadorBase
 {
     protected ?ValidadorBase $siguiente = null;
+    protected ?string $motivoRechazo = null;
 
     public function establecerSiguiente(ValidadorBase $validador): ValidadorBase
     {
@@ -18,11 +19,19 @@ abstract class ValidadorBase
     {
         if ($this->procesar($prestamo)) {
             if ($this->siguiente) {
+                $this->motivoRechazo = $this->siguiente->motivoRechazo;
                 return $this->siguiente->manejar($prestamo);
             }
             return true;
+        } else {
+            // Si el validador falla, conserva su motivo
+            return false;
         }
-        return false;
+    }
+
+    public function obtenerMotivoRechazo(): ?string
+    {
+        return $this->motivoRechazo;
     }
 
     abstract protected function procesar(Prestamo $prestamo): bool;

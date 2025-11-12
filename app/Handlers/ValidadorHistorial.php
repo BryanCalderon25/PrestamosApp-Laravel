@@ -8,6 +8,10 @@ class ValidadorHistorial extends ValidadorBase
 {
     protected function procesar(Prestamo $prestamo): bool
     {
-        return $prestamo->historial_crediticio >= 700;
+        if ($prestamo->historial_crediticio < 600) {
+            $this->motivoRechazo = 'Historial crediticio insuficiente (mínimo 600).';
+            return false;
+        }
+        return true;
     }
 }

@@ -8,6 +8,10 @@ class ValidadorCapacidadPago extends ValidadorBase
 {
     protected function procesar(Prestamo $prestamo): bool
     {
-        return $prestamo->ingresos_mensuales >= $prestamo->monto_solicitado / 10;
+        if ($prestamo->ingresos_mensuales < $prestamo->monto_solicitado / 10) {
+            $this->motivoRechazo = 'Los ingresos mensuales son insuficientes para cubrir el préstamo.';
+            return false;
+        }
+        return true;
     }
 }

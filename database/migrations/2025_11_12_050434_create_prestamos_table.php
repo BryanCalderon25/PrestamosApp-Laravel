@@ -10,9 +10,9 @@ return new class extends Migration {
         Schema::create('prestamos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre_cliente');
-            $table->decimal('monto_solicitado', 10, 2);
+            $table->decimal('monto_solicitado', 15, 2);
             $table->integer('historial_crediticio');
-            $table->decimal('ingresos_mensuales', 10, 2);
+            $table->decimal('ingresos_mensuales', 15, 2);
             $table->string('estado')->nullable();
             $table->timestamps();
         });

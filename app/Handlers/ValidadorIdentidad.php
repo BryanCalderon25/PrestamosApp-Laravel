@@ -8,6 +8,10 @@ class ValidadorIdentidad extends ValidadorBase
 {
     protected function procesar(Prestamo $prestamo): bool
     {
-        return !empty($prestamo->nombre_cliente);
+        if (empty($prestamo->nombre_cliente)) {
+            $this->motivoRechazo = 'Debe ingresar el nombre del cliente.';
+            return false;
+        }
+        return true;
     }
 }

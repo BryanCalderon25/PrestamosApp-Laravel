@@ -12,10 +12,12 @@ class Prestamo extends Model
     protected $table = 'prestamos';
 
     protected $fillable = [
-        'nombre_cliente',
-        'monto_solicitado',
-        'historial_crediticio',
-        'ingresos_mensuales',
-        'estado'
-    ];
+    'nombre_cliente',
+    'monto_solicitado',
+    'historial_crediticio',
+    'ingresos_mensuales',
+    'estado',
+    'motivo_rechazo'
+];
+
 }

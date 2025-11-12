@@ -6,12 +6,14 @@ use App\Models\Prestamo;
 
 class ValidadorIdentidad extends ValidadorBase
 {
+    // Revisa si el nombre del cliente está vacío
     protected function procesar(Prestamo $prestamo): bool
     {
         if (empty($prestamo->nombre_cliente)) {
             $this->motivoRechazo = 'Debe ingresar el nombre del cliente.';
             return false;
         }
+
         return true;
     }
 }

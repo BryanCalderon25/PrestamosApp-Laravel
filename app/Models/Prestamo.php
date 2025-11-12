@@ -9,15 +9,16 @@ class Prestamo extends Model
 {
     use HasFactory;
 
+    // Nombre de la tabla en la base de datos
     protected $table = 'prestamos';
 
+    // Campos que se pueden llenar 
     protected $fillable = [
-    'nombre_cliente',
-    'monto_solicitado',
-    'historial_crediticio',
-    'ingresos_mensuales',
-    'estado',
-    'motivo_rechazo'
-];
-
+        'nombre_cliente',         // Nombre del solicitante
+        'monto_solicitado',       // Monto que pide el cliente
+        'historial_crediticio',   // Puntaje crediticio 
+        'ingresos_mensuales',     // Ingresos 
+        'estado',                 // Aprobado / Rechazado
+        'motivo_rechazo'          // Motivo cuando algún validador falla
+    ];
 }

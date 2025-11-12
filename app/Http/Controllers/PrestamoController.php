@@ -58,11 +58,40 @@ class PrestamoController extends Controller
     {
         $prestamos = Prestamo::latest()->get();
         $coleccion = new ColeccionPrestamos();
+        $totalPrestamos = $prestamos->count();
 
         foreach ($prestamos as $prestamo) {
             $coleccion->agregarPrestamo($prestamo);
         }
 
-        return view('prestamos.aprobados', compact('coleccion'));
+        $pasosIterador = [
+            [
+                'titulo' => 'rewind()',
+                'resumen' => 'Posiciona el puntero al inicio de la colección antes de comenzar.',
+                'detalle' => 'Se ejecuta automáticamente cuando la vista inicia el foreach, preparando el primer elemento.'
+            ],
+            [
+                'titulo' => 'current()',
+                'resumen' => 'Obtiene el préstamo que corresponde a la posición actual.',
+                'detalle' => 'Entrega el modelo de préstamo que se renderiza en la tarjeta de la lista.'
+            ],
+            [
+                'titulo' => 'key()',
+                'resumen' => 'Devuelve la clave asociada al elemento actual.',
+                'detalle' => 'Sirve para que PHP sepa en qué índice vamos mientras se itera.'
+            ],
+            [
+                'titulo' => 'next()',
+                'resumen' => 'Avanza el puntero al siguiente préstamo disponible.',
+                'detalle' => 'Se dispara al terminar cada vuelta del foreach para preparar el siguiente ciclo.'
+            ],
+            [
+                'titulo' => 'valid()',
+                'resumen' => 'Comprueba si aún hay elementos que recorrer.',
+                'detalle' => 'Cuando ya no hay más préstamos, devuelve false y el bucle concluye.'
+            ],
+        ];
+
+        return view('prestamos.aprobados', compact('coleccion', 'pasosIterador', 'totalPrestamos'));
     }
 }

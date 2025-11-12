@@ -19,9 +19,22 @@ class PrestamoController extends Controller
         return view('prestamos.crear');
     }
 
-    // Procesa un préstamo aplicando Chain of Responsibility
+    // validación Chain of Responsibility
     public function procesar(Request $request)
     {
+        // ValidatesRequests
+        $this->validate($request, [
+            'nombre_cliente'      => 'required|string|max:100',
+            'monto_solicitado'    => 'required|numeric|min:1|max:999999999',
+            'historial_crediticio'=> 'required|numeric|min:300|max:850',
+            'ingresos_mensuales'  => 'required|numeric|min:0',
+        ], [
+            'required' => 'El campo :attribute es obligatorio.',
+            'numeric'  => 'El campo :attribute debe ser un número.',
+            'min'      => 'El valor del campo :attribute es demasiado bajo.',
+            'max'      => 'El valor del campo :attribute excede el límite permitido.',
+        ]);
+
         // Crear el préstamo con los datos del formulario
         $prestamo = new Prestamo();
         $prestamo->nombre_cliente = $request->nombre_cliente;
@@ -30,31 +43,36 @@ class PrestamoController extends Controller
         $prestamo->ingresos_mensuales = $request->ingresos_mensuales;
 
         // Construcción de la cadena de validadores
-        $v1 = new ValidadorIdentidad();     // Primer paso
-        $v2 = new ValidadorHistorial();     // Segundo paso
-        $v3 = new ValidadorCapacidadPago(); // Tercer paso
+        $v1 = new ValidadorIdentidad();     // Primero
+        $v2 = new ValidadorHistorial();     // Segundo
+        $v3 = new ValidadorCapacidadPago(); // Tercero
 
-        // Enlazar los validadores en cadena
+        // Enlazar los validadores
         $v1->establecerSiguiente($v2)->establecerSiguiente($v3);
 
-        // Ejecutar la cadena
+     // Ejecutar la cadena de validación
         if ($v1->manejar($prestamo)) {
-            // Si todas las validaciones pasan
+            // Si todos los validadores permiten continuar
             $prestamo->estado = 'Aprobado';
             $prestamo->motivo_rechazo = null;
-            $prestamo->save();
-
-            session()->flash('mensaje', '✅ Préstamo aprobado con éxito.');
-            session()->flash('tipo', 'success');
         } else {
-            // Si la cadena falla en algún punto
+            // Si algún validador falla, se detiene y se obtiene el motivo
             $prestamo->estado = 'Rechazado';
             $prestamo->motivo_rechazo = $v1->obtenerMotivoRechazo();
-            $prestamo->save();
-
-            session()->flash('mensaje', '❌ Préstamo rechazado: ' . $prestamo->motivo_rechazo);
-            session()->flash('tipo', 'danger');
         }
+
+        // Guardar en la base de datos
+        $prestamo->save();
+
+        // Mensajes para la vista
+        session()->flash(
+            'mensaje',
+            ($prestamo->estado === 'Aprobado')
+                ? '✅ Préstamo aprobado con éxito.'
+                : '❌ Préstamo rechazado: ' . $prestamo->motivo_rechazo
+        );
+
+        session()->flash('tipo', $prestamo->estado === 'Aprobado' ? 'success' : 'danger');
 
         return redirect()->route('prestamos.crear');
     }
@@ -62,19 +80,15 @@ class PrestamoController extends Controller
     // Página de historial con iterador
     public function aprobados()
     {
-        // Obtener préstamos en orden cronológico (el más viejo primero)
         $prestamos = Prestamo::oldest()->get();
 
-        // Crear colección personalizada para aplicar Iterador
         $coleccion = new ColeccionPrestamos();
         $totalPrestamos = $prestamos->count();
 
-        // Agregar cada préstamo a la colección
         foreach ($prestamos as $prestamo) {
             $coleccion->agregarPrestamo($prestamo);
         }
 
-        // Datos para explicar los métodos del iterador en la vista
         $pasosIterador = [
             [
                 'titulo' => 'rewind()',
@@ -89,17 +103,17 @@ class PrestamoController extends Controller
             [
                 'titulo' => 'key()',
                 'resumen' => 'Devuelve el índice actual.',
-                'detalle' => 'Sirve para saber en qué posición va el foreach.'
+                'detalle' => 'Indica en qué posición está la iteración.'
             ],
             [
                 'titulo' => 'next()',
                 'resumen' => 'Avanza al siguiente elemento.',
-                'detalle' => 'Se dispara al terminar cada iteración del foreach.'
+                'detalle' => 'Se dispara después de cada iteración del foreach.'
             ],
             [
                 'titulo' => 'valid()',
-                'resumen' => 'Comprueba si hay más elementos.',
-                'detalle' => 'Cuando devuelve false, el foreach termina.'
+                'resumen' => 'Verifica si quedan elementos.',
+                'detalle' => 'Cuando devuelve false, el foreach se detiene.'
             ],
         ];
 

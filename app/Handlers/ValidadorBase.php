@@ -17,16 +17,25 @@ abstract class ValidadorBase
 
     public function manejar(Prestamo $prestamo): bool
     {
-        if ($this->procesar($prestamo)) {
-            if ($this->siguiente) {
-                $this->motivoRechazo = $this->siguiente->motivoRechazo;
-                return $this->siguiente->manejar($prestamo);
-            }
-            return true;
-        } else {
-            // Si el validador falla, conserva su motivo
+        // Si este validador falla, detenemos la cadena y guardamos el motivo
+        if (!$this->procesar($prestamo)) {
             return false;
         }
+
+        // Si pasa, pero hay otro validador después, lo ejecutamos
+        if ($this->siguiente) {
+            $resultado = $this->siguiente->manejar($prestamo);
+
+            // Si el siguiente falla, tomamos su motivo
+            if (!$resultado) {
+                $this->motivoRechazo = $this->siguiente->obtenerMotivoRechazo();
+            }
+
+            return $resultado;
+        }
+
+        // Si no hay más validadores, todo fue exitoso
+        return true;
     }
 
     public function obtenerMotivoRechazo(): ?string
